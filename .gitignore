@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+
+# Excel output
+incident_reports.xlsx
+
+# Audio outputs
+static/tts_audio/*.mp3
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environment
+venv/
