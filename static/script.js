@@ -8,100 +8,120 @@ const statusText = document.getElementById("status");
 const transcriptBox = document.getElementById("transcriptBox");
 const jsonBox = document.getElementById("jsonBox");
 
-let confirmButton = null;
-
 recordBtn.onclick = async () => {
 
     if (!isRecording) {
 
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
+        try {
 
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
-            }
-        };
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        mediaRecorder.onstop = async () => {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
 
-            const blob = new Blob(audioChunks, { type: "audio/webm" });
-            stream.getTracks().forEach(track => track.stop());
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
 
-            const formData = new FormData();
-            formData.append("audio", blob);
+            mediaRecorder.onstop = async () => {
 
-            statusText.innerText = "Processing...";
+                statusText.innerText = "Processing report...";
+                recordBtn.disabled = true;
 
-            const response = await fetch("/upload_audio", {
-                method: "POST",
-                body: formData
-            });
+                const blob = new Blob(audioChunks, { type: "audio/webm" });
 
-            const data = await response.json();
+                const formData = new FormData();
+                formData.append("audio", blob);
 
-            transcriptBox.innerText = data.transcript || "";
+                try {
 
-            if (data.needs_clarification) {
-                jsonBox.innerText =
-                    "⚠ Clarification Needed:\n\n" +
-                    data.clarification_question +
-                    "\n\nPlease record again.";
-                statusText.innerText = "Waiting for clarification...";
-                return;
-            }
-
-            // Show structured JSON
-            jsonBox.innerText =
-                "📋 Extracted Report:\n\n" +
-                JSON.stringify(data.structured, null, 2);
-
-            // Play TTS if available
-            if (data.tts_audio_url) {
-                const audio = new Audio(data.tts_audio_url);
-                audio.play();
-            }
-
-            // If awaiting confirmation
-            if (data.awaiting_confirmation) {
-
-                if (confirmButton) confirmButton.remove();
-
-                confirmButton = document.createElement("button");
-                confirmButton.innerText = "Confirm & Save Report";
-                confirmButton.style.marginTop = "20px";
-                confirmButton.style.padding = "10px 20px";
-                confirmButton.style.fontSize = "16px";
-
-                confirmButton.onclick = async () => {
-
-                    const confirmResponse = await fetch("/confirm_report", {
-                        method: "POST"
+                    const response = await fetch("/upload_audio", {
+                        method: "POST",
+                        body: formData
                     });
 
-                    const confirmData = await confirmResponse.json();
+                    const data = await response.json();
 
-                    jsonBox.innerText +=
-                        "\n\n✅ " + confirmData.status;
+                    transcriptBox.innerText = data.transcript || "";
 
-                    confirmButton.remove();
-                };
+                    if (data.needs_clarification) {
 
-                jsonBox.appendChild(confirmButton);
-            }
+                        jsonBox.innerHTML = `
+                            <b>Clarification Needed</b><br><br>
+                            ${data.clarification_question}
+                        `;
 
-            statusText.innerText = "Done";
-        };
+                        statusText.innerText = "Waiting for clarification";
+                        recordBtn.disabled = false;
+                        return;
+                    }
 
-        mediaRecorder.start(250);
-        recordBtn.innerText = "Stop Recording";
-        statusText.innerText = "Recording...";
-        isRecording = true;
+                    const s = data.structured;
+                  
+
+                    let html = "";
+
+                    for (const key in s) {
+
+                      if (s[key] && s[key] !== "") {
+
+                           const label = key
+                             .replace("_"," ")
+                             .replace("_"," ")
+                             .toUpperCase();
+
+                            html += `<b>${label}:</b> ${s[key]}<br><br>`;
+                         }
+
+                }
+
+                 jsonBox.innerHTML = html;
+
+                    jsonBox.innerHTML = `
+                        <b>Equipment:</b> ${s.equipment}<br><br>
+                        <b>Location:</b> ${s.location_or_unit}<br><br>
+                        <b>Incident:</b> ${s.incident_summary}<br><br>
+                        <b>Date:</b> ${s.incident_date}<br><br>
+                        <b>Time:</b> ${s.incident_time}<br><br>
+                        <b>Severity:</b> ${s.severity || "-"}
+                    `;
+
+                    if (data.tts_audio_url) {
+                        const audio = new Audio(data.tts_audio_url);
+                        audio.play();
+                    }
+
+                    statusText.innerText = "Report recorded successfully";
+                    recordBtn.disabled = false;
+
+                } catch (error) {
+
+                    console.error(error);
+                    statusText.innerText = "Processing failed";
+                    recordBtn.disabled = false;
+                }
+            };
+
+            mediaRecorder.start();
+
+            recordBtn.innerText = "Stop Recording";
+            statusText.innerText = "Recording... Speak clearly";
+            isRecording = true;
+
+        } catch (error) {
+
+            console.error(error);
+            statusText.innerText = "Microphone access denied";
+        }
 
     } else {
 
         mediaRecorder.stop();
+
+        stream.getTracks().forEach(track => track.stop());
+
         recordBtn.innerText = "Start Recording";
         isRecording = false;
     }

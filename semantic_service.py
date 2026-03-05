@@ -1,62 +1,150 @@
-import os
-import json
-from openai import OpenAI
-from dotenv import load_dotenv
-
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=os.getenv("OPENAI_BASE_URL")
-)
+import re
+from datetime import datetime
 
 
-def extract_structured_data(transcript):
+EQUIPMENTS = {
+    "pump",
+    "motor",
+    "compressor",
+    "valve",
+    "boiler",
+    "generator",
+    "turbine",
+    "fan",
+    "conveyor",
+    "reactor"
+}
 
-    prompt = f"""
-Extract structured incident report data from the transcript.
 
-Return ONLY JSON in this format:
+INCIDENT_MAP = {
 
-{{
-  "equipment": "",
-  "incident_summary": "",
-  "location_or_unit": "",
-  "incident_date": "",
-  "incident_time": "",
-  "severity": ""
-}}
+    "overheat": "overheating",
+    "overheated": "overheating",
+    "overheating": "overheating",
 
-Rules:
-- equipment = affected machine/device
-- incident_summary = what happened
-- location_or_unit = where it happened
-- incident_date = date if mentioned
-- incident_time = time if mentioned
-- severity = Low, Medium, High if obvious
-- If not mentioned, return empty string.
+    "leak": "leak",
+    "leaking": "leak",
+    "leaked": "leak",
 
-Transcript:
-"{transcript}"
-"""
+    "failure": "failure",
+    "failed": "failure",
 
-    response = client.responses.create(
-        model="gpt-4.1-nano",
-        input=prompt
-    )
+    "malfunction": "malfunction",
+    "malfunctioning": "malfunction",
 
-    raw_output = response.output_text.strip()
+    "breakdown": "breakdown",
+    "broken": "breakdown",
 
-    try:
-        structured_json = json.loads(raw_output)
-    except json.JSONDecodeError:
-        structured_json = {
-            "equipment": "",
-            "incident_summary": "",
-            "location_or_unit": "",
-            "incident_date": "",
-            "incident_time": "",
-            "severity": ""
-        }
+    "smoke": "smoke",
+    "smoking": "smoke",
 
-    return structured_json
+    "vibration": "vibration",
+    "vibrating": "vibration",
+
+    "shutdown": "shutdown",
+
+    "blockage": "blockage",
+    "blocked": "blockage"
+}
+
+
+SEVERITY = {
+    "minor",
+    "major",
+    "critical"
+}
+
+
+def extract_equipment(text):
+
+    words = text.split()
+
+    for word in words:
+        if word in EQUIPMENTS:
+            return word
+
+    return ""
+
+
+def extract_incident(text):
+
+    words = text.split()
+
+    for word in words:
+
+        if word in INCIDENT_MAP:
+            return INCIDENT_MAP[word]
+
+    return ""
+
+
+def extract_location(text):
+
+    match = re.search(r"unit\s*\d+", text)
+
+    if match:
+        return match.group()
+
+    return ""
+
+
+def extract_time(text):
+
+    match = re.search(r"\d{1,2}\s*(am|pm)", text)
+
+    if match:
+        return match.group()
+
+    return ""
+
+
+def extract_severity(text):
+
+    words = text.split()
+
+    for word in words:
+
+        if word in SEVERITY:
+            return word
+
+    return ""
+
+
+def extract_temperature(text):
+
+    match = re.search(r"\d+\s*degree", text)
+
+    if match:
+        return match.group()
+
+    return ""
+
+
+def extract_structured_data(text):
+
+    text = text.lower()
+
+    data = {
+
+        "reporter_name": "",
+
+        "department": "",
+
+        "equipment": extract_equipment(text),
+
+        "incident_summary": extract_incident(text),
+
+        "location_or_unit": extract_location(text),
+
+        "incident_date": datetime.now().strftime("%Y-%m-%d"),
+
+        "incident_time": extract_time(text),
+
+        "severity": extract_severity(text),
+
+        "measured_parameters": extract_temperature(text),
+
+        "remarks": ""
+    }
+
+    return data

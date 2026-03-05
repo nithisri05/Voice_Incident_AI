@@ -12,16 +12,16 @@ client = OpenAI(
 
 def generate_confirmation_speech(structured):
 
-    text = (
-        f"Incident recorded in {structured.get('location_or_unit')} "
-        f"on {structured.get('incident_date')} "
-        f"at {structured.get('incident_time')}. "
-        f"The {structured.get('equipment')} "
-        f"{structured.get('incident_summary')}. "
-    )
+    text = "Incident recorded."
 
-    if structured.get("severity"):
-        text += f"Severity level is {structured.get('severity')}."
+    if structured.get("equipment"):
+        text += f" {structured['equipment']}"
+
+    if structured.get("location_or_unit"):
+        text += f" in {structured['location_or_unit']}"
+
+    if structured.get("incident_time"):
+        text += f" at {structured['incident_time']}."
 
     response = client.audio.speech.create(
         model="gpt-4o-mini-tts",

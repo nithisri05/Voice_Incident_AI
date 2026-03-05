@@ -1,58 +1,63 @@
 import os
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
-from zipfile import BadZipFile
 
 FILE_NAME = "incident_reports.xlsx"
 
 
-def create_new_workbook():
+def create_file():
+
     wb = Workbook()
     ws = wb.active
-    ws.title = "Incident Reports"
 
     headers = [
-        "System Timestamp",
-        "Incident Date",
-        "Incident Time",
-        "Reporter Name",
-        "Department",
-        "Location/Unit",
-        "Equipment",
-        "Incident Summary",
-        "Measured Parameters",
-        "Severity"
+        "timestamp",
+        "reporter_name",
+        "department",
+        "equipment",
+        "incident_summary",
+        "location_or_unit",
+        "incident_date",
+        "incident_time",
+        "severity",
+        "measured_parameters",
+        "remarks"
     ]
 
     ws.append(headers)
+
     wb.save(FILE_NAME)
 
 
-def save_report_to_excel(report_data):
-
-    if not os.path.exists(FILE_NAME):
-        create_new_workbook()
+def save_report_to_excel(data):
 
     try:
+
+        if not os.path.exists(FILE_NAME):
+            create_file()
+
         wb = load_workbook(FILE_NAME)
-    except BadZipFile:
-        os.remove(FILE_NAME)
-        create_new_workbook()
-        wb = load_workbook(FILE_NAME)
 
-    ws = wb.active
+        ws = wb.active
 
-    ws.append([
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        report_data.get("incident_date", ""),
-        report_data.get("incident_time", ""),
-        report_data.get("reporter_name", ""),
-        report_data.get("department", ""),
-        report_data.get("location_or_unit", ""),
-        report_data.get("equipment", ""),
-        report_data.get("incident_summary", ""),
-        str(report_data.get("measured_parameters", {})),
-        report_data.get("severity", "")
-    ])
+        row = [
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data.get("reporter_name",""),
+            data.get("department",""),
+            data.get("equipment",""),
+            data.get("incident_summary",""),
+            data.get("location_or_unit",""),
+            data.get("incident_date",""),
+            data.get("incident_time",""),
+            data.get("severity",""),
+            str(data.get("measured_parameters","")),
+            data.get("remarks","")
+        ]
 
-    wb.save(FILE_NAME)
+        ws.append(row)
+
+        wb.save(FILE_NAME)
+
+    except Exception as e:
+
+        print("Excel write error:", e)
