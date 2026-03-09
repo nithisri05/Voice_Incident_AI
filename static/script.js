@@ -158,7 +158,7 @@ recordBtn.onclick = async () => {
                 }
             };
 
-            mediaRecorder.start();
+            mediaRecorder.start(250);
             recordBtn.innerHTML = "<span>⏹ Stop Recording</span>";
             recordBtn.classList.add("recording");
             statusText.innerText = "🔴 Listening... Speak clearly";

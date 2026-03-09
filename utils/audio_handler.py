@@ -1,17 +1,20 @@
 import io
 
-
 def save_audio_file(audio_file):
     """
-    Convert uploaded audio into a memory stream
-    and attach filename so Whisper recognizes format.
+    Convert uploaded audio to memory stream.
+    Ignore extremely small recordings (noise).
     """
 
     audio_bytes = audio_file.read()
 
+    # ignore very tiny audio (noise clicks)
+    if len(audio_bytes) < 2000:
+        return None
+
     audio_stream = io.BytesIO(audio_bytes)
 
-    # IMPORTANT: give the stream a filename
+    # whisper needs filename
     audio_stream.name = "speech.webm"
 
     return audio_stream

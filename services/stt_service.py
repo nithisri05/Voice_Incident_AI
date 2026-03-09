@@ -12,14 +12,13 @@ client = OpenAI(
 
 def transcribe_audio(audio_stream):
     """
-    Transcribe audio using Whisper.
-    Works with both Flask uploads and evaluation files.
+    Fast Whisper transcription.
+    Uses direct memory stream.
     """
 
     response = client.audio.transcriptions.create(
         model="whisper-1",
         file=audio_stream,
-        language="en",
         temperature=0
     )
 
