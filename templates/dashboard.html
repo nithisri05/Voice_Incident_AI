@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Incident Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>📊 Dashboard</h2>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- STATS -->
+        <div class="stats">
+            <div class="card">
+                <h3>Total Incidents</h3>
+                <p id="total">0</p>
+            </div>
+
+            <div class="card high">
+                <h3>High Severity</h3>
+                <p id="high">0</p>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipment</th>
+                        <th>Issue</th>
+                        <th>Location</th>
+                        <th>Severity</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="incidentTable"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/dashboard.js"></script>
+
+</body>
+</html>

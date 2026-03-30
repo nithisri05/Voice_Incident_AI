@@ -211,6 +211,45 @@ def warmup():
     except:
         pass
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
+import pandas as pd
+
+EXCEL_FILE = os.path.join(BASE_DIR, "app", "incident_reports.xlsx")
+
+@app.route("/api/incidents")
+def get_incidents():
+
+    if not os.path.exists(EXCEL_FILE):
+        return jsonify([])
+
+    df = pd.read_excel(EXCEL_FILE)
+
+    data = df.fillna("").to_dict(orient="records")
+
+    return jsonify(data)
+
+
+@app.route("/api/stats")
+def get_stats():
+
+    if not os.path.exists(EXCEL_FILE):
+        return jsonify({"total": 0, "high": 0})
+
+    df = pd.read_excel(EXCEL_FILE)
+
+    total = len(df)
+
+    high = 0
+    if "severity" in df.columns:
+        high = len(df[df["severity"].str.lower() == "high"])
+
+    return jsonify({
+        "total": total,
+        "high": high
+    })
 
 if __name__ == "__main__":
 
