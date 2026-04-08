@@ -5,35 +5,86 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+<a href="/logout" style="position:absolute; top:20px; right:20px;">Logout</a>
+<div class="header">
+    <h1>🎤 Voice Incident AI</h1>
+    <p>Structured Industrial Voice Reporting System</p>
+</div>
 
-<div class="container">
+<div class="main-container">
 
-    <div class="header">
-        <h1>🎤 Voice Incident AI</h1>
-        <p>Structured Industrial Voice Reporting System</p>
+    <!-- LEFT PANEL -->
+    <div class="panel">
+
+        <button id="recordBtn">Start Recording</button>
+        <p id="status">Status: Idle</p>
+
+        <h3>Transcript</h3>
+        <div id="transcriptBox" class="box"></div>
+
+        <!-- TEXT INPUT -->
+        <div class="text-input-section">
+            <input type="text" id="manualText" placeholder="Or type incident here..." />
+            <button onclick="sendText()">Submit</button>
+        </div>
+
     </div>
 
-    <div class="main-grid">
+    <!-- RIGHT PANEL -->
+    <div class="panel">
 
-        <div class="left-panel">
-            <button id="recordBtn" type="button">Start Recording</button>
-            <p id="status">Status: Idle</p>
+        <h3>Structured Report</h3>
+        <div id="jsonBox" class="box"></div>
 
-            <div class="transcript-section">
-                <h3>Transcript</h3>
-                <div id="transcriptBox" class="box"></div>
-            </div>
-        </div>
-
-        <div class="right-panel">
-            <h3>Structured Report</h3>
-            <div id="jsonBox" class="box"></div>
-        </div>
-        
     </div>
 
 </div>
 
 <script src="/static/script.js"></script>
+
+<script>
+async function sendText() {
+
+    const text = document.getElementById("manualText").value.trim();
+    if (!text) return;
+
+    document.getElementById("status").innerText = "Processing text...";
+
+    const formData = new FormData();
+    formData.append("text", text);
+
+    const res = await fetch("/upload_audio", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    document.getElementById("transcriptBox").innerText = data.transcript;
+
+    if (data.needs_clarification) {
+        document.getElementById("jsonBox").innerHTML = `
+            <b>⚠️ Clarification</b><br>
+            ${data.clarification_question}
+        `;
+    } else {
+        const s = data.structured;
+
+        document.getElementById("jsonBox").innerHTML = `
+            <b>Reporter:</b> ${s.reporter_name || "-"}<br>
+            <b>Department:</b> ${s.department || "-"}<br>
+            <b>Equipment:</b> ${s.equipment || "-"}<br>
+            <b>Location:</b> ${s.location_or_unit || "-"}<br>
+            <b>Incident:</b> ${s.incident_summary || "-"}<br>
+            <b>Severity:</b> ${s.severity || "-"}<br>
+            <b>Action:</b> ${s.suggested_action || "-"}
+        `;
+    }
+
+    document.getElementById("status").innerText = "✅ Done";
+    document.getElementById("manualText").value = "";
+}
+</script>
+
 </body>
 </html>

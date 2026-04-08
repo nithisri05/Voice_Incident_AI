@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <div class="login-card">
+
+        <h2>🔐 Secure Login</h2>
+        <p class="subtitle">Only authorized users allowed</p>
+
+        <!-- GOOGLE -->
+        <div id="g_id_onload"
+             data-client_id="284391924030-6364to5tehb446ru4fm446e7abk9ag4g.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse">
+        </div>
+
+        <div class="g_id_signin"></div>
+
+        <p id="error" class="error"></p>
+
+    </div>
+
+</div>
+
+<script>
+function handleCredentialResponse(response) {
+
+    fetch("/google_login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            credential: response.credential
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        } else {
+            document.getElementById("error").innerText = data.error;
+        }
+    });
+}
+</script>
+
+</body>
+</html>

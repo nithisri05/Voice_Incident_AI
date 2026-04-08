@@ -2,7 +2,10 @@ import os
 from openpyxl import Workbook, load_workbook
 from datetime import datetime
 
-FILE_NAME = "incident_reports.xlsx"
+# ---------------- FILE PATH FIX ----------------
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FILE_NAME = os.path.join(BASE_DIR, "app", "incident_reports.xlsx")
 
 
 def create_file():
@@ -33,11 +36,13 @@ def save_report_to_excel(data):
 
     try:
 
+        # Ensure folder exists
+        os.makedirs(os.path.dirname(FILE_NAME), exist_ok=True)
+
         if not os.path.exists(FILE_NAME):
             create_file()
 
         wb = load_workbook(FILE_NAME)
-
         ws = wb.active
 
         row = [
@@ -59,5 +64,4 @@ def save_report_to_excel(data):
         wb.save(FILE_NAME)
 
     except Exception as e:
-
         print("Excel write error:", e)

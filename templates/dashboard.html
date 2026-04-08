@@ -1,32 +1,71 @@
 <!DOCTYPE html>
 <html>
+<a href="/logout" style="position:absolute; top:20px; right:20px;">Logout</a>
 <head>
-    <title>Incident Dashboard</title>
+   
     <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <div class="container">
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <h2>📊 Dashboard</h2>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main">
 
-        <!-- STATS -->
+        <!-- KPI -->
+        <div class="stats">
+            <div class="card"><h3>Total</h3><p id="total">0</p></div>
+            <div class="card high"><h3>High</h3><p id="high">0</p></div>
+            <div class="card"><h3>Medium</h3><p id="medium">0</p></div>
+            <div class="card"><h3>Low</h3><p id="low">0</p></div>
+        </div>
+
+        <!-- INSIGHTS -->
         <div class="stats">
             <div class="card">
-                <h3>Total Incidents</h3>
-                <p id="total">0</p>
+                <h3>Top Equipment</h3>
+                <p id="topEquipment">-</p>
             </div>
 
-            <div class="card high">
-                <h3>High Severity</h3>
-                <p id="high">0</p>
+            <div class="card">
+                <h3>Top Department</h3>
+                <p id="topDept">-</p>
             </div>
+        </div>
+
+        <!-- TREND -->
+        <div class="card">
+            <h3>Insight</h3>
+            <p id="trendText">Analyzing...</p>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="stats">
+            <div class="card">
+                <h3>Severity Distribution</h3>
+                <canvas id="severityChart"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>Equipment Distribution</h3>
+                <canvas id="equipmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- FILTER -->
+        <div style="margin:15px 0;">
+            <select id="filter" onchange="loadDashboard()">
+                <option value="all">All</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
         </div>
 
         <!-- TABLE -->
@@ -35,11 +74,11 @@
                 <thead>
                     <tr>
                         <th>Equipment</th>
-                        <th>Issue</th>
+                        <th>Department</th>
                         <th>Location</th>
+                        <th>Incident</th>
                         <th>Severity</th>
-                        <th>Date</th>
-                        <th>Time</th>
+                     
                     </tr>
                 </thead>
                 <tbody id="incidentTable"></tbody>
@@ -47,7 +86,6 @@
         </div>
 
     </div>
-
 </div>
 
 <script src="/static/dashboard.js"></script>

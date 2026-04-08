@@ -14,12 +14,19 @@ def generate_confirmation_speech(data):
 
     text = "Incident report recorded successfully."
 
-    response = client.audio.speech.create(
-        model="gpt-4o-mini-tts",
-        voice="alloy",
-        input=text
-    )
+    try:
+        response = client.audio.speech.create(
+            model="gpt-4o-mini-tts",
+            voice="alloy",
+            input=text,
+            timeout=5  # 🔥 prevent long waiting
+        )
 
-    audio_bytes = response.read()
+        audio_bytes = response.read()
+        return audio_bytes, text
 
-    return audio_bytes, text
+    except Exception as e:
+        print("TTS ERROR:", e)
+
+        # 🔥 fallback (no crash)
+        return None, text
