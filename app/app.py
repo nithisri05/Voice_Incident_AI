@@ -262,6 +262,9 @@ def upload_audio():
 
 # ================= RUN =================
 
+
 if __name__ == "__main__":
-    print("🚀 Running with Google Login (STRICT MODE)")
-    app.run(debug=True)
+    print("🚀 Running on Render")
+
+    port = int(os.environ.get("PORT", 10000))  # Render gives PORT
+    app.run(host="0.0.0.0", port=port)
