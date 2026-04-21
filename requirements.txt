@@ -2,9 +2,16 @@ Flask==3.1.0
 flask-cors==5.0.1
 gunicorn==21.2.0
 
-numpy==2.3.0
+numpy==2.2.0
 pandas==2.2.3
 scikit-learn==1.6.1
 
-opencv-python==4.11.0.86
+opencv-python-headless==4.11.0.86
 mediapipe==0.10.33
+
+gtts
+googletrans==4.0.0-rc1
+
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
