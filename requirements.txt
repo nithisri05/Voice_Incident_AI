@@ -15,3 +15,5 @@ googletrans==4.0.0-rc1
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
+
+openai
